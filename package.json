@@ -12,10 +12,13 @@
   "dependencies": {
     "firebase": "^11.6.1",
     "lodash": "^4.18.1",
-    "quill": "^2.0.3",
+    "quill": "2.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-quill-new": "^3.4.6"
+  },
+  "overrides": {
+    "quill": "2.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

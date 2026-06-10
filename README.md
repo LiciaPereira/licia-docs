@@ -1,43 +1,71 @@
-# licia-docs
+# Licia Docs
 
-A live collaborative text editor built with React, TypeScript, Vite, and Firebase.
+A real-time collaborative document editor built with React, TypeScript, Vite, Firebase Authentication, and Firestore.
 
-Hosted at: https://licia-docs.web.app/
+Live site: https://licia-docs.web.app/
+
+## Why This Project Matters
+
+This project demonstrates a richer frontend application than a static portfolio piece: real-time data syncing, document ownership, authentication, routing between document states, and a text editor experience built with reusable React components.
+
+## Tech Stack
+
+- React
+- TypeScript
+- Vite
+- Firebase Authentication
+- Firestore
+- Quill editor
 
 ## Features
 
-- Real-time collaboration: multiple users can edit the same document simultaneously and see changes instantly.
-- Active anonymous user avatars: view who else is in the document via their avatars in the header.
-- Document management: create new documents, and delete only the documents you created.
+- Real-time document editing with synced Firestore updates.
+- Anonymous authentication for quick access.
+- Document list with created and edited timestamps.
+- Document creation and deletion.
+- Rich text editing through Quill.
+- Firebase hosting deployment.
 
 ## Getting Started
 
-1. Clone:
-   ```bash
-   git clone https://github.com/yourusername/licia-docs.git
-   cd licia-docs
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure Firebase:
-   - Paste your Firebase config into `src/firebase-config.ts`.
-   - Enable Firestore and Authentication.
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
+Install dependencies:
 
-Open http://localhost:3000 to start editing documents.
+```bash
+npm install
+```
 
-## Usage
+Create a `.env` file in the project root:
 
-- Select or create a document from the sidebar.
-- Edit text collaboratively; changes sync in real time.
-- See active collaborators via avatars in the header.
-- Delete your own documents using the delete button next to each entry.
+```env
+VITE_APIKEY=your_firebase_api_key
+VITE_AUTHDOMAIN=your_firebase_auth_domain
+VITE_PROJECTID=your_firebase_project_id
+VITE_STORAGEBUCKET=your_firebase_storage_bucket
+VITE_MESSAGINGSENDERID=your_firebase_messaging_sender_id
+VITE_APPID=your_firebase_app_id
+```
 
-## Contributing
+Run the development server:
 
-Contributions are welcome! Fork the repo, make changes, and submit a pull request.
+```bash
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+## Available Scripts
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run preview
+```
+
+## Development Notes
+
+The most important implementation details are the Firebase-backed document state, editor integration, and TypeScript/Vite project setup. This project is a good frontend signal because it goes beyond static UI and includes persistent real-time behavior.
