@@ -11,6 +11,7 @@ import { auth } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebase-config";
 import "../style/document-selector.css";
+import { getDocumentName } from "../utils/document-name";
 
 //define the props interface for the document selector component
 interface DocumentSelectorProps {
@@ -47,15 +48,7 @@ function DocumentSelector({ onSelect }: DocumentSelectorProps) {
       const data = docSnap.data();
 
       //get the doc name from the data, or if there's none, generate a default name
-      let name = data.title as string;
-      if (!name) {
-        const text =
-          data.content
-            ?.map((op) => (typeof op.insert === "string" ? op.insert : ""))
-            .join("")
-            .slice(0, 20) || "";
-        name = text + (text.length >= 20 ? "..." : "Untitled Document");
-      }
+      const name = getDocumentName(data.title as string, data.content);
 
       //return the doc data
       const created = data.createdAt?.toDate?.() ?? null;
