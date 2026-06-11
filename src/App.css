@@ -1,13 +1,44 @@
+:root {
+  /* color tokens */
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-accent: #0d9488;
+  --color-accent-hover: #0f766e;
+  --color-accent-soft: #f0fdfa;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+
+  /* radius, shadow, spacing */
+  --radius-sm: 7px;
+  --radius-md: 9px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
 body {
-  margin: 0;
-  font-family: "Roboto", sans-serif;
-  background-color: #edf6f9;
-  color: #006d77;
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
 }
 
 .App {
@@ -17,29 +48,37 @@ body {
   min-height: 100vh;
 }
 
+/* main content fills the space between header and footer */
 .App > div {
-  height: calc(100vh - 130px - 4rem);
-}
-
-header {
-  text-align: center;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #006d77;
-  color: #edf6f9;
-  padding: 1rem;
+  flex: 1;
   width: 100%;
-  height: 80px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 1000px;
+  padding: var(--space-4);
 }
 
+/* light app header with hairline divider */
+header {
+  width: 100%;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+header h1 {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+/* quiet single-line footer on the page background */
 footer {
   width: 100%;
   text-align: center;
-  position: absolute;
-  bottom: 0;
-  background-color: #006d77;
-  height: 30px;
-  color: #fff;
-  padding: 5px;
-  align-content: center;
+  padding: var(--space-4);
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
 }

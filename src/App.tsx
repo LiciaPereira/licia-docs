@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import { auth } from "./firebase-config";
+import { auth, isFirebaseConfigured } from "./firebase-config";
 import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import TextEditor from "./components/text-editor";
 import DocumentSelector from "./components/document-selector.tsx";
@@ -11,18 +11,22 @@ function App() {
   );
 
   useEffect(() => {
-    signInAnonymously(auth);
-    onAuthStateChanged(auth, (user) => {
+    if (!isFirebaseConfigured) return;
+
+    signInAnonymously(auth).catch(() => undefined);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log(`User signed in: ${user.uid}`);
       }
     });
+
+    return unsubscribe;
   }, []);
 
   return (
     <div className="App">
       <header>
-        <h1>Licia Docs ツ</h1>
+        <h1>Licia Docs</h1>
       </header>
       {!selectedDocumentId ? (
         <DocumentSelector onSelect={setSelectedDocumentId} />
@@ -32,7 +36,7 @@ function App() {
           onBack={() => setSelectedDocumentId(null)}
         />
       )}
-      <footer> Made by Licia Pereira | 2025 </footer>
+      <footer>Made by Licia Pereira | {new Date().getFullYear()}</footer>
     </div>
   );
 }
