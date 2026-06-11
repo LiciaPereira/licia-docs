@@ -2,6 +2,9 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import type { FirebaseApp } from "firebase/app";
+import type { Auth } from "firebase/auth";
+import type { Firestore } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 // Your web app's Firebase configuration
@@ -14,7 +17,12 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_APPID,
 };
 
+export const isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean);
+
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const appInstance = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
+export const app = appInstance as FirebaseApp;
+export const auth = appInstance ? getAuth(appInstance) : (null as unknown as Auth);
+export const db = appInstance
+  ? getFirestore(appInstance)
+  : (null as unknown as Firestore);

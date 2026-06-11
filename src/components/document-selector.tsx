@@ -7,9 +7,8 @@ import {
   doc,
   serverTimestamp,
 } from "firebase/firestore";
-import { auth } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
-import { db } from "../firebase-config";
+import { auth, db, isFirebaseConfigured } from "../firebase-config";
 import "../style/document-selector.css";
 
 //define the props interface for the document selector component
@@ -32,6 +31,8 @@ function DocumentSelector({ onSelect }: DocumentSelectorProps) {
 
   // get current user UID
   useEffect(() => {
+    if (!isFirebaseConfigured) return;
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUserUid(user?.uid || null);
     });
@@ -40,6 +41,11 @@ function DocumentSelector({ onSelect }: DocumentSelectorProps) {
 
   //define a function to fetch documents from the firestore db
   const fetchDocuments = async () => {
+    if (!isFirebaseConfigured) {
+      setDocuments([]);
+      return;
+    }
+
     const docsSnapshot = await getDocs(collection(db, "documents"));
 
     //map over the documents in the snapshot and extract their data
@@ -80,6 +86,8 @@ function DocumentSelector({ onSelect }: DocumentSelectorProps) {
   }, []);
 
   const createNewDocument = async () => {
+    if (!isFirebaseConfigured) return;
+
     const newDocRef = await addDoc(collection(db, "documents"), {
       content: [],
       createdAt: serverTimestamp(),
@@ -92,6 +100,8 @@ function DocumentSelector({ onSelect }: DocumentSelectorProps) {
 
   // delete a document (only by creator)
   const deleteDocument = async (id: string) => {
+    if (!isFirebaseConfigured) return;
+
     await deleteDoc(doc(db, "documents", id));
     await fetchDocuments();
   };
