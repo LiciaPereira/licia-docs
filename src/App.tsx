@@ -26,7 +26,7 @@ function App() {
   return (
     <div className="App">
       <header>
-        <h1>Licia Docs ツ</h1>
+        <h1>Licia Docs</h1>
       </header>
       {!selectedDocumentId ? (
         <DocumentSelector onSelect={setSelectedDocumentId} />
@@ -36,7 +36,7 @@ function App() {
           onBack={() => setSelectedDocumentId(null)}
         />
       )}
-      <footer> Made by Licia Pereira | 2025 </footer>
+      <footer>Made by Licia Pereira | {new Date().getFullYear()}</footer>
     </div>
   );
 }

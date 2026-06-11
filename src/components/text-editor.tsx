@@ -9,7 +9,7 @@ import {
   collection,
   deleteDoc,
 } from "firebase/firestore";
-import { db, auth } from "../firebase-config";
+import { db, auth, isFirebaseConfigured } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
 import { throttle } from "lodash";
 import "react-quill-new/dist/quill.snow.css";
@@ -28,13 +28,17 @@ function TextEditor({ documentId, onBack }: TextEditorProps) {
   const [userUid, setUserUid] = useState<string | null>(null);
   const [activeUsers, setActiveUsers] = useState<string[]>([]);
   const quillRef = useRef<ReactQuill>(null);
-  const documentRef = doc(db, "documents", documentId);
+  const documentRef = isFirebaseConfigured
+    ? doc(db, "documents", documentId)
+    : null;
 
   //track if a change was made by the local user
   const isLocalChange = useRef(false);
 
   //set up authentication state changes
   useEffect(() => {
+    if (!isFirebaseConfigured) return;
+
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setUserUid(user ? user.uid : null); //update the userUid with the current user's ID
     });
@@ -43,7 +47,7 @@ function TextEditor({ documentId, onBack }: TextEditorProps) {
 
   useEffect(() => {
     //when user logs in, create a presence document to track active users in the document
-    if (!userUid) return;
+    if (!isFirebaseConfigured || !userUid) return;
     //create a reference to the presence documtn for the current user
     const presenceRef = doc(db, "documents", documentId, "presence", userUid);
     setDoc(presenceRef, { uid: userUid, lastSeen: serverTimestamp() });
@@ -66,6 +70,11 @@ function TextEditor({ documentId, onBack }: TextEditorProps) {
     if (quillRef.current && isLocalChange.current) {
       const content = quillRef.current.getEditor().getContents();
 
+      if (!documentRef) {
+        isLocalChange.current = false;
+        return;
+      }
+
       //set the document in firestore with the updated content
       setDoc(
         documentRef,
@@ -81,6 +90,24 @@ function TextEditor({ documentId, onBack }: TextEditorProps) {
 
   useEffect(() => {
     if (quillRef.current) {
+      const editor = quillRef.current.getEditor();
+      const handleTextChange = (_, __, source) => {
+        if (source === "user") {
+          isLocalChange.current = true;
+          setIsEditing(true);
+          saveContent();
+
+          setTimeout(() => setIsEditing(false), 5000);
+        }
+      };
+
+      if (!documentRef) {
+        editor.on("text-change", handleTextChange);
+        return () => {
+          editor.off("text-change", handleTextChange);
+        };
+      }
+
       //load initial content from firestore
       getDoc(documentRef)
         .then((docSnap) => {
@@ -114,16 +141,7 @@ function TextEditor({ documentId, onBack }: TextEditorProps) {
         }
       });
 
-      const editor = quillRef.current.getEditor();
-      editor.on("text-change", (_, __, source) => {
-        if (source === "user") {
-          isLocalChange.current = true;
-          setIsEditing(true);
-          saveContent();
-
-          setTimeout(() => setIsEditing(false), 5000);
-        }
-      });
+      editor.on("text-change", handleTextChange);
 
       return () => {
         unsubscribe();
@@ -149,13 +167,15 @@ function TextEditor({ documentId, onBack }: TextEditorProps) {
           placeholder="Untitled"
           aria-label="Document title"
           onChange={(e) => setTitle(e.target.value)}
-          onBlur={() =>
+          onBlur={() => {
+            if (!documentRef) return;
+
             setDoc(
               documentRef,
               { title, updatedAt: serverTimestamp() },
               { merge: true }
-            ).catch(console.error)
-          }
+            ).catch(console.error);
+          }}
         />
         <div className="user-icons" role="group" aria-label="Active users">
           {activeUsers.map((uid) => (

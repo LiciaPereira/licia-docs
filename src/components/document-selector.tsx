@@ -28,6 +28,7 @@ function DocumentSelector({ onSelect }: DocumentSelectorProps) {
     }[]
   >([]);
   const [userUid, setUserUid] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // get current user UID
   useEffect(() => {
@@ -43,9 +44,11 @@ function DocumentSelector({ onSelect }: DocumentSelectorProps) {
   const fetchDocuments = async () => {
     if (!isFirebaseConfigured) {
       setDocuments([]);
+      setIsLoading(false);
       return;
     }
 
+    setIsLoading(true);
     const docsSnapshot = await getDocs(collection(db, "documents"));
 
     //map over the documents in the snapshot and extract their data
@@ -78,6 +81,7 @@ function DocumentSelector({ onSelect }: DocumentSelectorProps) {
 
     //update the documents state with the fetched documents
     setDocuments(docs);
+    setIsLoading(false);
   };
 
   //use the useEffect hook to fetch documents when the component mounts
@@ -86,7 +90,10 @@ function DocumentSelector({ onSelect }: DocumentSelectorProps) {
   }, []);
 
   const createNewDocument = async () => {
-    if (!isFirebaseConfigured) return;
+    if (!isFirebaseConfigured) {
+      onSelect(`preview-${Date.now()}`);
+      return;
+    }
 
     const newDocRef = await addDoc(collection(db, "documents"), {
       content: [],
@@ -112,40 +119,70 @@ function DocumentSelector({ onSelect }: DocumentSelectorProps) {
       role="region"
       aria-label="Document selector"
     >
-      <h3>Select a Document</h3>
-      <ul>
-        <li className="doc-list-header">
-          <span className="col-name">Name</span>
-          <span className="col-created">Created</span>
-          <span className="col-edited">Edited</span>
-        </li>
-        {documents.map((doc) => (
-          <li key={doc.id} className="doc-list-item">
-            <button
-              onClick={() => onSelect(doc.id)}
-              className="col-name btn-doc"
-            >
-              {doc.name.length > 20 ? `${doc.name.slice(0, 17)}...` : doc.name}
-            </button>
-            <span className="col-delete">
-              {userUid === doc.createdBy && (
-                <button
-                  className="btn-delete-doc"
-                  aria-label="Delete document"
-                  onClick={() => deleteDocument(doc.id)}
-                >
-                  Delete
-                </button>
-              )}
-            </span>
-            <span className="col-created">{doc.createdAt}</span>
-            <span className="col-edited">{doc.updatedAt}</span>
+      <div className="selector-header">
+        <div>
+          <h3>Documents</h3>
+          {!isLoading && (
+            <p className="doc-count">
+              {documents.length}{" "}
+              {documents.length === 1 ? "document" : "documents"}
+            </p>
+          )}
+        </div>
+        <button onClick={createNewDocument} className="btn-primary">
+          New document
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="doc-skeleton" aria-hidden="true">
+          <span className="skeleton-row" />
+          <span className="skeleton-row" />
+          <span className="skeleton-row" />
+        </div>
+      ) : documents.length === 0 ? (
+        <div className="doc-empty">
+          <p className="doc-empty-title">No documents yet</p>
+          <p className="doc-empty-text">
+            Create your first document to start writing.
+          </p>
+          <button onClick={createNewDocument} className="btn-primary">
+            New document
+          </button>
+        </div>
+      ) : (
+        <ul>
+          <li className="doc-list-header">
+            <span className="col-name">Name</span>
+            <span className="col-created">Created</span>
+            <span className="col-edited">Edited</span>
+            <span className="col-delete" />
           </li>
-        ))}
-      </ul>
-      <button onClick={createNewDocument} className="btn-new-doc">
-        Create New Document
-      </button>
+          {documents.map((doc) => (
+            <li key={doc.id} className="doc-list-item">
+              <button
+                onClick={() => onSelect(doc.id)}
+                className="col-name btn-doc"
+              >
+                {doc.name.length > 20 ? `${doc.name.slice(0, 17)}...` : doc.name}
+              </button>
+              <span className="col-created">{doc.createdAt}</span>
+              <span className="col-edited">{doc.updatedAt}</span>
+              <span className="col-delete">
+                {userUid === doc.createdBy && (
+                  <button
+                    className="btn-delete-doc"
+                    aria-label="Delete document"
+                    onClick={() => deleteDocument(doc.id)}
+                  >
+                    Delete
+                  </button>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
